@@ -24,11 +24,11 @@ module.exports.index = async (req, res) => {
         limit: 2
     };
 
-    if(req.query.page) {
+    if (req.query.page) {
         objPagination.currentPage = parseInt(req.query.page);
     };
 
-    if(req.query.limit) {
+    if (req.query.limit) {
         objPagination.limit = parseInt(req.query.limit);
     }
 
@@ -37,7 +37,7 @@ module.exports.index = async (req, res) => {
     // End pagination
 
     // Search
-    if(req.query.keyword) {
+    if (req.query.keyword) {
         find.title = new RegExp(req.query.keyword, "i");
     };
     // End search
@@ -62,4 +62,82 @@ module.exports.detail = async (req, res) => {
     } catch (error) {
         res.json("Không tìm thấy!");
     }
+};
+
+// [PATCH] /api/v1/tasks/change-status/:id
+module.exports.changeStatus = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const status = req.body.status;
+
+        await Task.updateOne({ _id: id }, { status: status });
+
+        res.json({
+            code: 200,
+            message: "Cập nhật trạng thái thành công!"
+        });
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Không tồn tại!"
+        });
+    };
+};
+
+// [PATCH] /api/v1/tasks/change-multi
+module.exports.changeMulti = async (req, res) => {
+    try {
+        const { ids, key, value } = req.body;
+
+        console.log(ids);
+        console.log(key);
+        console.log(value);
+
+        switch (key) {
+            case "status":
+                await Task.updateMany({
+                    _id: { $in: ids }
+                }, {
+                    status: value
+                });
+
+                res.json({
+                    code: 200,
+                    message: "Cập nhật trạng thái thành công!"
+                });
+                break;
+
+            default:
+                res.json({
+                    code: 400,
+                    message: "Không tồn tại!"
+                });
+        };
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Không tồn tại!"
+        });
+    };
+};
+
+// [POST] /api/v1/tasks/create
+module.exports.create = async (req, res) => {
+    try {
+        const task = await Task(req.body);
+        const data = await task.save();
+
+        res.json({
+            code: 200,
+            message: "Tạo thành công!",
+            data: data
+        });
+
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Không tồn tại!"
+        });
+    };
 };
