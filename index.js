@@ -2,7 +2,6 @@ const express = require("express");
 require("dotenv").config();
 
 const database = require("./config/database");
-const Task = require("./models/task.model");
 const routesApiVer1 = require("./api/v1/routes/index.route");
 
 const app = express();
